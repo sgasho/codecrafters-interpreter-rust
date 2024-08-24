@@ -2,25 +2,29 @@
 pub enum TokenType {
     LParen,
     RParen,
+    LBrace,
+    RBrace,
     EOF,
     Nil,
 }
 
 pub struct Token {
     pub token_type: TokenType,
-    lexem: String,
-    literal: String,
+    lexeme: &'static str,
+    literal: &'static str,
 }
 
 impl Token {
     pub fn print(&self) {
-        println!("{} {} {}", self.token_type_to_print(), self.lexem, self.literal);
+        println!("{} {} {}", self.token_type_to_print(), self.lexeme, self.literal);
     }
 
     fn token_type_to_print(&self) -> &str {
         match self.token_type {
             TokenType::LParen => "LEFT_PAREN",
             TokenType::RParen => "RIGHT_PAREN",
+            TokenType::LBrace => "LEFT_BRACE",
+            TokenType::RBrace => "RIGHT_BRACE",
             TokenType::EOF => "EOF",
             TokenType::Nil => "Nil",
         }
@@ -51,7 +55,7 @@ impl Lexer {
 
     pub fn new_token(&mut self) -> Token {
         let mut t = TokenType::Nil;
-        let mut lexem = "";
+        let mut lexeme = "";
         let literal = "null";
 
         let ch = self.read_char();
@@ -59,11 +63,19 @@ impl Lexer {
         match ch {
             '(' => {
                 t = TokenType::LParen;
-                lexem = "(";
+                lexeme = "(";
             }
             ')' => {
                 t = TokenType::RParen;
-                lexem = ")";
+                lexeme = ")";
+            }
+            '{' => {
+                t = TokenType::LBrace;
+                lexeme = "{";
+            }
+            '}' => {
+                t = TokenType::RBrace;
+                lexeme = "}";
             }
             '\0' => {
                 t = TokenType::EOF;
@@ -73,8 +85,8 @@ impl Lexer {
 
         Token {
             token_type: t,
-            lexem: lexem.to_string(),
-            literal: literal.to_string(),
+            lexeme,
+            literal,
         }
     }
 }
