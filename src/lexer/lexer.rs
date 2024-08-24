@@ -97,11 +97,11 @@ impl Lexer {
         false
     }
 
-    fn peek_token_is(&self, ch: char) -> bool {
-        if self.position + 1 >= self.input.len() {
+    fn current_token_is(&self, ch: char) -> bool {
+        if self.position >= self.input.len() {
             return false;
         }
-        self.input[self.position + 1] == ch
+        self.input[self.position] == ch
     }
 
     fn add_token(&mut self, token_type: TokenType, lexeme: &'static str, literal: &'static str) {
@@ -113,7 +113,7 @@ impl Lexer {
     }
 
     fn skip_line(&mut self) {
-        while self.position < self.input.len() && !self.peek_token_is('\n') && !self.peek_token_is('\0') {
+        while self.position < self.input.len() && !self.current_token_is('\n') && !self.current_token_is('\0') {
             self.position += 1;
         }
     }
