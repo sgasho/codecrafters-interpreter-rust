@@ -1,3 +1,5 @@
+mod lexer;
+
 use std::env;
 use std::fs;
 use std::io::{self, Write};
@@ -23,7 +25,14 @@ fn main() {
             });
 
             if !file_contents.is_empty() {
-                panic!("Scanner not implemented");
+                let mut l = lexer::lexer::Lexer::new(file_contents);
+                loop {
+                    let tok = l.new_token();
+                    tok.print();
+                    if tok.token_type == lexer::lexer::TokenType::EOF {
+                        break;
+                    }
+                }
             } else {
                 println!("EOF  null"); // Placeholder, remove this line when implementing the scanner
             }
