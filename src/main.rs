@@ -31,7 +31,7 @@ fn main() {
                 l.tokenize();
 
                 for err in l.errors.iter() {
-                    err.print();
+                    err.print_error();
                 }
 
                 for token in l.tokens.iter() {
