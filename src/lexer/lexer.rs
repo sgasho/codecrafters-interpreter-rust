@@ -4,6 +4,13 @@ pub enum TokenType {
     RParen,
     LBrace,
     RBrace,
+    Comma,
+    Dot,
+    Minus,
+    Plus,
+    Semicolon,
+    Asterisk,
+    Slash,
     EOF,
     Nil,
 }
@@ -25,6 +32,13 @@ impl Token {
             TokenType::RParen => "RIGHT_PAREN",
             TokenType::LBrace => "LEFT_BRACE",
             TokenType::RBrace => "RIGHT_BRACE",
+            TokenType::Comma => "COMMA",
+            TokenType::Dot => "DOT",
+            TokenType::Minus => "MINUS",
+            TokenType::Plus => "PLUS",
+            TokenType::Semicolon => "SEMICOLON",
+            TokenType::Asterisk => "STAR",
+            TokenType::Slash => "SLASH",
             TokenType::EOF => "EOF",
             TokenType::Nil => "Nil",
         }
@@ -76,6 +90,34 @@ impl Lexer {
             '}' => {
                 t = TokenType::RBrace;
                 lexeme = "}";
+            }
+            ',' => {
+                t = TokenType::Comma;
+                lexeme = ",";
+            }
+            '.' => {
+                t = TokenType::Dot;
+                lexeme = ".";
+            }
+            '-' => {
+                t = TokenType::Minus;
+                lexeme = "-";
+            }
+            '+' => {
+                t = TokenType::Plus;
+                lexeme = "+";
+            }
+            ';' => {
+                t = TokenType::Semicolon;
+                lexeme = ";";
+            }
+            '*' => {
+                t = TokenType::Asterisk;
+                lexeme = "*";
+            }
+            '/' => {
+                t = TokenType::Slash;
+                lexeme = "/";
             }
             '\0' => {
                 t = TokenType::EOF;
