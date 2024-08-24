@@ -128,15 +128,18 @@ impl Lexer {
         }
     }
 
-    fn read_string(&mut self) -> String {
+    fn read_string(&mut self) -> Option<String> {
         let mut str = String::new();
         while self.input[self.position] != '"' {
             let ch = self.input[self.position];
             str.push(ch);
             self.position += 1;
+            if self.position >= self.input.len() || self.current_token_is('\n') || self.current_token_is('\0') {
+                return None;
+            }
         }
         self.position += 1;
-        str
+        Some(str)
     }
 
     pub fn tokenize(&mut self) {
@@ -194,8 +197,10 @@ impl Lexer {
                     continue;
                 }
                 '"' => {
-                    let str = self.read_string();
-                    self.add_token_string(TokenType::String, format!("\"{}\"", str.clone()), str.clone())
+                    match self.read_string() {
+                        Some(str) =>  self.add_token_string(TokenType::String, format!("\"{}\"", str.clone()), str.clone()),
+                        None => self.errors.push(format!("[line {line_number}] Error: Unterminated string.")),
+                    }
                 }
                 _ if ch.is_whitespace() => continue,
                 _ => {
