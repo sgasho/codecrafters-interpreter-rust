@@ -1,8 +1,10 @@
 mod lexer;
+mod common;
 
 use std::env;
 use std::fs;
 use std::io::{self, Write};
+use crate::common::common::PrjString;
 
 fn main() {
     let args: Vec<String> = env::args().collect();
@@ -26,12 +28,14 @@ fn main() {
 
             if !file_contents.is_empty() {
                 let mut l = lexer::lexer::Lexer::new(file_contents);
-                loop {
-                    let tok = l.new_token();
-                    tok.print();
-                    if tok.token_type == lexer::lexer::TokenType::EOF {
-                        break;
-                    }
+                l.tokenize();
+
+                for err in l.errors.iter() {
+                    err.print();
+                }
+
+                for token in l.tokens.iter() {
+                    token.print();
                 }
             } else {
                 println!("EOF  null"); // Placeholder, remove this line when implementing the scanner

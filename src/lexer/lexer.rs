@@ -1,4 +1,4 @@
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Clone)]
 pub enum TokenType {
     LParen,
     RParen,
@@ -12,9 +12,9 @@ pub enum TokenType {
     Asterisk,
     Slash,
     EOF,
-    Nil,
 }
 
+#[derive(Clone)]
 pub struct Token {
     pub token_type: TokenType,
     lexeme: &'static str,
@@ -40,7 +40,6 @@ impl Token {
             TokenType::Asterisk => "STAR",
             TokenType::Slash => "SLASH",
             TokenType::EOF => "EOF",
-            TokenType::Nil => "Nil",
         }
     }
 }
@@ -48,6 +47,8 @@ impl Token {
 pub struct Lexer {
     input: Vec<char>,
     position: usize,
+    pub tokens: Vec<Token>,
+    pub errors: Vec<String>,
 }
 
 impl Lexer {
@@ -55,80 +56,54 @@ impl Lexer {
         Self {
             input: input.chars().collect(),
             position: 0,
+            tokens: Vec::new(),
+            errors: Vec::new(),
         }
     }
 
-    pub fn read_char(&mut self) -> char {
+    pub fn read_char(&mut self) -> Option<char> {
         if self.position >= self.input.len() {
-            return '\0';
+            return None;
         }
         let pos = self.position;
         self.position += 1;
-        self.input[pos]
+        Some(self.input[pos])
     }
 
-    pub fn new_token(&mut self) -> Token {
-        let mut t = TokenType::Nil;
-        let mut lexeme = "";
-        let literal = "null";
-
-        let ch = self.read_char();
-
-        match ch {
-            '(' => {
-                t = TokenType::LParen;
-                lexeme = "(";
-            }
-            ')' => {
-                t = TokenType::RParen;
-                lexeme = ")";
-            }
-            '{' => {
-                t = TokenType::LBrace;
-                lexeme = "{";
-            }
-            '}' => {
-                t = TokenType::RBrace;
-                lexeme = "}";
-            }
-            ',' => {
-                t = TokenType::Comma;
-                lexeme = ",";
-            }
-            '.' => {
-                t = TokenType::Dot;
-                lexeme = ".";
-            }
-            '-' => {
-                t = TokenType::Minus;
-                lexeme = "-";
-            }
-            '+' => {
-                t = TokenType::Plus;
-                lexeme = "+";
-            }
-            ';' => {
-                t = TokenType::Semicolon;
-                lexeme = ";";
-            }
-            '*' => {
-                t = TokenType::Asterisk;
-                lexeme = "*";
-            }
-            '/' => {
-                t = TokenType::Slash;
-                lexeme = "/";
-            }
-            '\0' => {
-                t = TokenType::EOF;
-            }
-            _ => {}
-        }
-
-        Token {
-            token_type: t,
+    fn add_token(&mut self, token_type: TokenType, lexeme: &'static str, literal: &'static str) {
+        self.tokens.push(Token {
+            token_type,
             lexeme,
             literal,
+        });
+    }
+    pub fn tokenize(&mut self) {
+        let mut line_number = 1;
+
+        while let Some(ch) = self.read_char() {
+            match ch {
+                '(' => self.add_token(TokenType::LParen, "(", "null"),
+                ')' => self.add_token(TokenType::RParen, ")", "null"),
+                '{' => self.add_token(TokenType::LBrace, "{", "null"),
+                '}' => self.add_token(TokenType::RBrace, "}", "null"),
+                ',' => self.add_token(TokenType::Comma, ",", "null"),
+                '.' => self.add_token(TokenType::Dot, ".", "null"),
+                '-' => self.add_token(TokenType::Minus, "-", "null"),
+                '+' => self.add_token(TokenType::Plus, "+", "null"),
+                ';' => self.add_token(TokenType::Semicolon, ";", "null"),
+                '*' => self.add_token(TokenType::Asterisk, "*", "null"),
+                '/' => self.add_token(TokenType::Slash, "/", "null"),
+                '\n' | '\r' => {
+                    line_number += 1;
+                    continue;
+                }
+                _ => {
+                    self.errors.push(format!("[line {line_number}] Error: Unexpected character: {ch}"));
+                    continue;
+                }
+            }
         }
+
+        self.add_token(TokenType::EOF, "", "null");
     }
 }
