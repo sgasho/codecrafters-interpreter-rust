@@ -97,6 +97,13 @@ impl Lexer {
         false
     }
 
+    fn peek_token_is(&self, ch: char) -> bool {
+        if self.position + 1 >= self.input.len() {
+            return false;
+        }
+        self.input[self.position + 1] == ch
+    }
+
     fn add_token(&mut self, token_type: TokenType, lexeme: &'static str, literal: &'static str) {
         self.tokens.push(Token {
             token_type,
@@ -104,6 +111,13 @@ impl Lexer {
             literal,
         });
     }
+
+    fn skip_line(&mut self) {
+        while self.position < self.input.len() && !self.peek_token_is('\n') && !self.peek_token_is('\0') {
+            self.position += 1;
+        }
+    }
+
     pub fn tokenize(&mut self) {
         let mut line_number = 1;
 
@@ -119,7 +133,13 @@ impl Lexer {
                 '+' => self.add_token(TokenType::Plus, "+", "null"),
                 ';' => self.add_token(TokenType::Semicolon, ";", "null"),
                 '*' => self.add_token(TokenType::Asterisk, "*", "null"),
-                '/' => self.add_token(TokenType::Slash, "/", "null"),
+                '/' => {
+                    if self.expect_current_token('/') {
+                        self.skip_line();
+                    } else {
+                        self.add_token(TokenType::Slash, "/", "null")
+                    }
+                }
                 '=' => {
                     if self.expect_current_token('=') {
                         self.add_token(TokenType::Equal, "==", "null");
@@ -152,6 +172,7 @@ impl Lexer {
                     line_number += 1;
                     continue;
                 }
+                _ if ch.is_whitespace() => continue,
                 _ => {
                     self.errors.push(format!("[line {line_number}] Error: Unexpected character: {ch}"));
                     continue;
