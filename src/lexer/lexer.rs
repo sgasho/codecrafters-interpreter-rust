@@ -15,6 +15,10 @@ pub enum TokenType {
     Equal,
     Bang,
     NotEqual,
+    Less,
+    LessEqual,
+    Greater,
+    GreaterEqual,
     EOF,
 }
 
@@ -47,6 +51,10 @@ impl Token {
             TokenType::Equal => "EQUAL_EQUAL",
             TokenType::Bang => "BANG",
             TokenType::NotEqual => "BANG_EQUAL",
+            TokenType::Less => "LESS",
+            TokenType::LessEqual => "LESS_EQUAL",
+            TokenType::Greater => "GREATER",
+            TokenType::GreaterEqual => "GREATER_EQUAL",
             TokenType::EOF => "EOF",
         }
     }
@@ -124,6 +132,20 @@ impl Lexer {
                         self.add_token(TokenType::NotEqual, "!=", "null");
                     } else {
                         self.add_token(TokenType::Bang, "!", "null");
+                    }
+                }
+                '<' => {
+                    if self.expect_current_token('=') {
+                        self.add_token(TokenType::LessEqual, "<=", "null");
+                    } else {
+                        self.add_token(TokenType::Less, "<", "null");
+                    }
+                }
+                '>' => {
+                    if self.expect_current_token('=') {
+                        self.add_token(TokenType::GreaterEqual, ">=", "null");
+                    } else {
+                        self.add_token(TokenType::Greater, ">", "null");
                     }
                 }
                 '\n' | '\r' => {
