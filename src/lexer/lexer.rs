@@ -19,14 +19,15 @@ pub enum TokenType {
     LessEqual,
     Greater,
     GreaterEqual,
+    String,
     EOF,
 }
 
 #[derive(Clone)]
 pub struct Token {
     pub token_type: TokenType,
-    lexeme: &'static str,
-    literal: &'static str,
+    lexeme: String,
+    literal: String,
 }
 
 impl Token {
@@ -55,6 +56,7 @@ impl Token {
             TokenType::LessEqual => "LESS_EQUAL",
             TokenType::Greater => "GREATER",
             TokenType::GreaterEqual => "GREATER_EQUAL",
+            TokenType::String => "STRING",
             TokenType::EOF => "EOF",
         }
     }
@@ -107,6 +109,14 @@ impl Lexer {
     fn add_token(&mut self, token_type: TokenType, lexeme: &'static str, literal: &'static str) {
         self.tokens.push(Token {
             token_type,
+            lexeme: lexeme.to_string(),
+            literal: literal.to_string(),
+        });
+    }
+
+    fn add_token_string(&mut self, token_type: TokenType, lexeme: String, literal: String) {
+        self.tokens.push(Token {
+            token_type,
             lexeme,
             literal,
         });
@@ -116,6 +126,17 @@ impl Lexer {
         while self.position < self.input.len() && !self.current_token_is('\n') && !self.current_token_is('\0') {
             self.position += 1;
         }
+    }
+
+    fn read_string(&mut self) -> String {
+        let mut str = String::new();
+        while self.input[self.position] != '"' {
+            let ch = self.input[self.position];
+            str.push(ch);
+            self.position += 1;
+        }
+        self.position += 1;
+        str
     }
 
     pub fn tokenize(&mut self) {
@@ -171,6 +192,10 @@ impl Lexer {
                 '\n' | '\r' => {
                     line_number += 1;
                     continue;
+                }
+                '"' => {
+                    let str = self.read_string();
+                    self.add_token_string(TokenType::String, format!("\"{}\"", str.clone()), str.clone())
                 }
                 _ if ch.is_whitespace() => continue,
                 _ => {
