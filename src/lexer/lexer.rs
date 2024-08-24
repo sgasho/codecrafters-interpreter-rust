@@ -11,6 +11,8 @@ pub enum TokenType {
     Semicolon,
     Asterisk,
     Slash,
+    Assign,
+    Equal,
     EOF,
 }
 
@@ -39,6 +41,8 @@ impl Token {
             TokenType::Semicolon => "SEMICOLON",
             TokenType::Asterisk => "STAR",
             TokenType::Slash => "SLASH",
+            TokenType::Assign => "EQUAL",
+            TokenType::Equal => "EQUAL_EQUAL",
             TokenType::EOF => "EOF",
         }
     }
@@ -70,6 +74,17 @@ impl Lexer {
         Some(self.input[pos])
     }
 
+    fn expect_current_token(&mut self, ch: char) -> bool {
+        if self.position >= self.input.len() {
+            return false;
+        }
+        if self.input[self.position] == ch {
+            self.position += 1;
+            return true;
+        }
+        false
+    }
+
     fn add_token(&mut self, token_type: TokenType, lexeme: &'static str, literal: &'static str) {
         self.tokens.push(Token {
             token_type,
@@ -96,6 +111,13 @@ impl Lexer {
                 '\n' | '\r' => {
                     line_number += 1;
                     continue;
+                }
+                '=' => {
+                    if self.expect_current_token('=') {
+                        self.add_token(TokenType::Equal, "==", "null");
+                    } else {
+                        self.add_token(TokenType::Assign, "=", "null");
+                    }
                 }
                 _ => {
                     self.errors.push(format!("[line {line_number}] Error: Unexpected character: {ch}"));
