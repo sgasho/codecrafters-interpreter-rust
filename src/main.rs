@@ -1,7 +1,7 @@
 mod lexer;
 mod common;
 
-use std::env;
+use std::{env, process};
 use std::fs;
 use std::io::{self, Write};
 use crate::common::common::PrjString;
@@ -36,6 +36,10 @@ fn main() {
 
                 for token in l.tokens.iter() {
                     token.print();
+                }
+
+                if l.errors.len() > 0 {
+                    process::exit(65);
                 }
             } else {
                 println!("EOF  null"); // Placeholder, remove this line when implementing the scanner
