@@ -13,6 +13,8 @@ pub enum TokenType {
     Slash,
     Assign,
     Equal,
+    Bang,
+    NotEqual,
     EOF,
 }
 
@@ -43,6 +45,8 @@ impl Token {
             TokenType::Slash => "SLASH",
             TokenType::Assign => "EQUAL",
             TokenType::Equal => "EQUAL_EQUAL",
+            TokenType::Bang => "BANG",
+            TokenType::NotEqual => "BANG_EQUAL",
             TokenType::EOF => "EOF",
         }
     }
@@ -108,16 +112,23 @@ impl Lexer {
                 ';' => self.add_token(TokenType::Semicolon, ";", "null"),
                 '*' => self.add_token(TokenType::Asterisk, "*", "null"),
                 '/' => self.add_token(TokenType::Slash, "/", "null"),
-                '\n' | '\r' => {
-                    line_number += 1;
-                    continue;
-                }
                 '=' => {
                     if self.expect_current_token('=') {
                         self.add_token(TokenType::Equal, "==", "null");
                     } else {
                         self.add_token(TokenType::Assign, "=", "null");
                     }
+                }
+                '!' => {
+                    if self.expect_current_token('=') {
+                        self.add_token(TokenType::NotEqual, "!=", "null");
+                    } else {
+                        self.add_token(TokenType::Bang, "!", "null");
+                    }
+                }
+                '\n' | '\r' => {
+                    line_number += 1;
+                    continue;
                 }
                 _ => {
                     self.errors.push(format!("[line {line_number}] Error: Unexpected character: {ch}"));
