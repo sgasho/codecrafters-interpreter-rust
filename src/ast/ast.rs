@@ -55,11 +55,12 @@ impl Expression for Nil {}
 
 pub struct Number {
     pub value: f64,
+    pub literal: String,
 }
 
 impl Node for Number {
     fn string(&self) -> String {
-        self.value.to_string()
+        self.literal.to_string()
     }
 }
 
