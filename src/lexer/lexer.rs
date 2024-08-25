@@ -1,3 +1,4 @@
+use std::collections::HashMap;
 use crate::common::common::PrjChar;
 
 #[derive(Debug, PartialEq, Clone)]
@@ -24,6 +25,22 @@ pub enum TokenType {
     String,
     Number,
     Identifier,
+    And,
+    Class,
+    Else,
+    False,
+    For,
+    Fun,
+    If,
+    Nil,
+    Or,
+    Print,
+    Return,
+    Super,
+    This,
+    True,
+    Var,
+    While,
     EOF,
 }
 
@@ -63,6 +80,22 @@ impl Token {
             TokenType::String => "STRING",
             TokenType::Number => "NUMBER",
             TokenType::Identifier => "IDENTIFIER",
+            TokenType::And => "AND",
+            TokenType::Class => "CLASS",
+            TokenType::Else => "ELSE",
+            TokenType::False => "FALSE",
+            TokenType::For => "FOR",
+            TokenType::Fun => "FUN",
+            TokenType::If => "IF",
+            TokenType::Nil => "Nil",
+            TokenType::Or => "OR",
+            TokenType::Print => "PRINT",
+            TokenType::Return => "RETURN",
+            TokenType::Super => "SUPER",
+            TokenType::This => "THIS",
+            TokenType::True => "TRUE",
+            TokenType::Var => "VAR",
+            TokenType::While => "While",
             TokenType::EOF => "EOF",
         }
     }
@@ -73,16 +106,40 @@ pub struct Lexer {
     position: usize,
     pub tokens: Vec<Token>,
     pub errors: Vec<String>,
+    keywords: HashMap<String, TokenType>,
 }
 
 impl Lexer {
     pub fn new(input: String) -> Self {
-        Self {
+        let mut lexer = Self {
             input: input.chars().collect(),
             position: 0,
             tokens: Vec::new(),
             errors: Vec::new(),
-        }
+            keywords: HashMap::new(),
+        };
+
+        lexer.init_keywords();
+        lexer
+    }
+
+    fn init_keywords(&mut self) {
+        self.keywords.insert("and".to_string(), TokenType::And);
+        self.keywords.insert("class".to_string(), TokenType::Class);
+        self.keywords.insert("else".to_string(), TokenType::Else);
+        self.keywords.insert("false".to_string(), TokenType::False);
+        self.keywords.insert("for".to_string(), TokenType::For);
+        self.keywords.insert("fun".to_string(), TokenType::Fun);
+        self.keywords.insert("if".to_string(), TokenType::If);
+        self.keywords.insert("nil".to_string(), TokenType::Nil);
+        self.keywords.insert("or".to_string(), TokenType::Or);
+        self.keywords.insert("print".to_string(), TokenType::Print);
+        self.keywords.insert("return".to_string(), TokenType::Return);
+        self.keywords.insert("super".to_string(), TokenType::Super);
+        self.keywords.insert("this".to_string(), TokenType::This);
+        self.keywords.insert("true".to_string(), TokenType::True);
+        self.keywords.insert("var".to_string(), TokenType::Var);
+        self.keywords.insert("while".to_string(), TokenType::While);
     }
 
     pub fn read_char(&mut self) -> Option<char> {
@@ -180,6 +237,14 @@ impl Lexer {
         return (lexeme, literal);
     }
 
+    fn add_token_identifier(&mut self, ident: String) {
+        if let Some(token_type) = self.keywords.get(&ident) {
+            self.add_token_string(token_type.clone(), ident, "null".to_string());
+        } else {
+            self.add_token_string(TokenType::Identifier, ident, "null".to_string());
+        }
+    }
+
     fn read_identifier(&mut self, first: char) -> String {
         let mut ident = String::new();
         ident.push(first);
@@ -262,7 +327,7 @@ impl Lexer {
                 }
                 _ if ch.is_identifier_char() => {
                     let ident = self.read_identifier(ch);
-                    self.add_token_string(TokenType::Identifier, ident, "null".to_string())
+                    self.add_token_identifier(ident);
                 }
                 _ if ch.is_whitespace() => continue,
                 _ => {
