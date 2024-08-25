@@ -65,3 +65,15 @@ impl Node for Number {
 }
 
 impl Expression for Number {}
+
+pub struct StringLiteral {
+    pub value: String,
+}
+
+impl Node for StringLiteral {
+    fn string(&self) -> String {
+        self.value.to_string()
+    }
+}
+
+impl Expression for StringLiteral {}

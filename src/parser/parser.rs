@@ -1,4 +1,4 @@
-use crate::ast::ast::{Boolean, Expression, ExpressionStatement, Nil, Number, Program, Statement};
+use crate::ast::ast::{Boolean, Expression, ExpressionStatement, Nil, Number, Program, Statement, StringLiteral};
 use crate::lexer::lexer::{Lexer, Token, TokenType};
 use crate::lexer::lexer::TokenType::EOF;
 
@@ -79,6 +79,14 @@ impl Parser {
                 match self.current_token().cloned() {
                     Some(token) => {
                         Box::new(Number { value: token.literal.parse().unwrap(), literal: token.literal})
+                    }
+                    None => Box::new(Nil {}),
+                }
+            }
+            Some(TokenType::String) => {
+                match self.current_token().cloned() {
+                    Some(token) => {
+                        Box::new(StringLiteral { value: token.literal })
                     }
                     None => Box::new(Nil {}),
                 }
