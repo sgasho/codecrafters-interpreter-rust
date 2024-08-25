@@ -177,7 +177,7 @@ impl Lexer {
     fn read_identifier(&mut self, first: char) -> String {
         let mut ident = String::new();
         ident.push(first);
-        while self.is_char_alphabet_or_underscore() {
+        while self.is_char_identifier_one() {
             ident.push(self.input[self.position]);
             self.position += 1;
         }
@@ -188,8 +188,8 @@ impl Lexer {
         self.position < self.input.len() && self.input[self.position].is_ascii_digit()
     }
 
-    fn is_char_alphabet_or_underscore(&self) -> bool {
-        self.position < self.input.len() && self.input[self.position].is_alphabet_or_underscore()
+    fn is_char_identifier_one(&self) -> bool {
+        self.position < self.input.len() && self.input[self.position].is_identifier_char()
     }
 
     pub fn tokenize(&mut self) {
@@ -254,7 +254,7 @@ impl Lexer {
                     let (lexeme, literal) = self.read_number_str(ch);
                     self.add_token_string(TokenType::Number, lexeme, literal);
                 }
-                _ if ch.is_alphabet_or_underscore() => {
+                _ if ch.is_identifier_char() => {
                     let ident = self.read_identifier(ch);
                     self.add_token_string(TokenType::Identifier, ident, "null".to_string())
                 }

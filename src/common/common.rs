@@ -9,11 +9,11 @@ impl PrjString for String {
 }
 
 pub trait PrjChar {
-    fn is_alphabet_or_underscore(&self) -> bool;
+    fn is_identifier_char(&self) -> bool;
 }
 
 impl PrjChar for char {
-    fn is_alphabet_or_underscore(&self) -> bool {
-        matches!(*self, 'a'..='z' | 'A'..='Z' | '_')
+    fn is_identifier_char(&self) -> bool {
+        matches!(*self, 'a'..='z' | 'A'..='Z' | '0'..='9' | '_')
     }
 }
