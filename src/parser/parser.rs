@@ -1,6 +1,6 @@
 use crate::ast::ast::{Boolean, Expression, ExpressionStatement, Grouping, InfixExpression, Nil, NumberLiteral, PrefixExpression, Program, Statement, StringLiteral};
 use crate::lexer::lexer::{Lexer, Token, TokenType};
-use crate::lexer::lexer::TokenType::{EOF};
+use crate::lexer::lexer::TokenType::{Asterisk, Slash, Plus, Minus, Less, LessEqual, Greater, GreaterEqual, EOF, Equal, NotEqual};
 
 pub struct Parser {
     lexer: Lexer,
@@ -102,7 +102,7 @@ impl Parser {
 
         while precedence < self.peek_precedence() {
             match self.peek_token_type() {
-                Some(TokenType::Asterisk | TokenType::Slash | TokenType::Plus | TokenType::Minus) => {
+                Some(Asterisk | Slash | Plus | Minus | Less | LessEqual | Greater | GreaterEqual | Equal | NotEqual) => {
                     self.next_token();
                     left = self.parse_infix_expression(left);
                 }
