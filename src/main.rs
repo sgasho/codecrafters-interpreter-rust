@@ -1,10 +1,13 @@
 mod lexer;
 mod common;
+mod parser;
+mod ast;
 
 use std::{env, process};
 use std::fs;
 use std::io::{self, Write};
 use crate::common::common::PrjString;
+use crate::parser::parser::Parser;
 
 fn main() {
     let args: Vec<String> = env::args().collect();
@@ -41,6 +44,27 @@ fn main() {
                 if l.errors.len() > 0 {
                     process::exit(65);
                 }
+            } else {
+                println!("EOF  null"); // Placeholder, remove this line when implementing the scanner
+            }
+        }
+        "parse" => {
+            let file_contents = fs::read_to_string(filename).unwrap_or_else(|_| {
+                writeln!(io::stderr(), "Failed to read file {}", filename).unwrap();
+                String::new()
+            });
+
+            if !file_contents.is_empty() {
+                let mut l = lexer::lexer::Lexer::new(file_contents);
+                l.tokenize();
+
+                if l.errors.len() > 0 {
+                    process::exit(65);
+                }
+
+                let mut p = Parser::new(l);
+                let pg = p.parse_program();
+                pg.print();
             } else {
                 println!("EOF  null"); // Placeholder, remove this line when implementing the scanner
             }
