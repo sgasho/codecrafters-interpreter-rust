@@ -1,4 +1,4 @@
-use crate::ast::ast::{Boolean, Expression, ExpressionStatement, Grouping, Nil, NumberLiteral, Program, Statement, StringLiteral};
+use crate::ast::ast::{Boolean, Expression, ExpressionStatement, Grouping, Nil, NumberLiteral, PrefixExpression, Program, Statement, StringLiteral};
 use crate::lexer::lexer::{Lexer, Token, TokenType};
 use crate::lexer::lexer::TokenType::{EOF};
 
@@ -95,6 +95,7 @@ impl Parser {
             Some(TokenType::Number) => self.parse_number_expression(),
             Some(TokenType::String) => self.parse_string_expression(),
             Some(TokenType::LParen) => self.parse_grouping_expression(),
+            Some(TokenType::Bang | TokenType::Minus) => self.parse_prefix_expression(),
             _ => self.parse_nil_expression(),
         };
 
@@ -144,5 +145,19 @@ impl Parser {
         Box::new(Grouping {
             expression: exp,
         })
+    }
+
+    fn parse_prefix_expression(&mut self) -> Box<dyn Expression> {
+        match self.current_token().cloned() {
+            Some(token) => {
+                self.next_token();
+                let right = self.parse_expression();
+                Box::new( PrefixExpression {
+                    operator: token.clone(),
+                    right,
+                } )
+            }
+            None => self.parse_nil_expression()
+        }
     }
 }

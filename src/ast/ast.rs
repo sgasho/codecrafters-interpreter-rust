@@ -1,3 +1,5 @@
+use crate::lexer::lexer::{Token, TokenType};
+
 pub trait Node {
     fn string(&self) -> String;
 }
@@ -89,3 +91,16 @@ impl Node for Grouping {
 }
 
 impl Expression for Grouping {}
+
+pub struct PrefixExpression {
+    pub operator: Token,
+    pub right: Box<dyn Expression>,
+}
+
+impl Node for PrefixExpression {
+    fn string(&self) -> String {
+        format!("({} {})", self.operator.lexeme, self.right.string())
+    }
+}
+
+impl Expression for PrefixExpression {}
