@@ -53,18 +53,18 @@ impl Node for Nil {
 
 impl Expression for Nil {}
 
-pub struct Number {
+pub struct NumberLiteral {
     pub value: f64,
     pub literal: String,
 }
 
-impl Node for Number {
+impl Node for NumberLiteral {
     fn string(&self) -> String {
         self.literal.to_string()
     }
 }
 
-impl Expression for Number {}
+impl Expression for NumberLiteral {}
 
 pub struct StringLiteral {
     pub value: String,
@@ -77,3 +77,15 @@ impl Node for StringLiteral {
 }
 
 impl Expression for StringLiteral {}
+
+pub struct Grouping {
+    pub expression: Box<dyn Expression>,
+}
+
+impl Node for Grouping {
+    fn string(&self) -> String {
+        format!("(group {})", self.expression.string())
+    }
+}
+
+impl Expression for Grouping {}

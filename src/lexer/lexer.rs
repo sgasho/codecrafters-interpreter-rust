@@ -1,7 +1,7 @@
 use std::collections::HashMap;
 use crate::common::common::PrjChar;
 
-#[derive(Debug, PartialEq, Clone)]
+#[derive(Debug, PartialEq, Clone, Eq, Hash)]
 pub enum TokenType {
     LParen,
     RParen,
@@ -42,6 +42,15 @@ pub enum TokenType {
     Var,
     While,
     EOF,
+}
+
+impl TokenType {
+    pub fn precedence(&self) -> i32 {
+        match self {
+            TokenType::LParen => 0,
+            _ => 0
+        }
+    }
 }
 
 #[derive(Clone)]
