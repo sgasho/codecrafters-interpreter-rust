@@ -5,6 +5,7 @@ use crate::lexer::lexer::TokenType::{Asterisk, Slash, Plus, Minus, Less, LessEqu
 pub struct Parser {
     lexer: Lexer,
     off: usize,
+    pub errors: Vec<String>,
 }
 
 impl Parser {
@@ -12,6 +13,7 @@ impl Parser {
         Self {
             lexer,
             off: 0,
+            errors: Vec::new(),
         }
     }
 
@@ -26,6 +28,13 @@ impl Parser {
         match self.current_token() {
             Some(token) => Some(&token.token_type),
             None => None
+        }
+    }
+
+    fn current_token_line_number(&self) -> i32 {
+        match self.current_token() {
+            Some(token) => token.line_number,
+            None => 0,
         }
     }
 
@@ -151,6 +160,7 @@ impl Parser {
         let exp = self.parse_expression(0);
 
         if !self.peek_token_type_is(TokenType::RParen) {
+            self.errors.push(format!("[line {}] Expect ')'", self.current_token_line_number()));
             return self.parse_nil_expression();
         }
 

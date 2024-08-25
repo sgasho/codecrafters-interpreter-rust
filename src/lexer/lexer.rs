@@ -62,6 +62,7 @@ pub struct Token {
     pub token_type: TokenType,
     pub lexeme: String,
     pub literal: String,
+    pub line_number: i32,
 }
 
 impl Token {
@@ -182,19 +183,21 @@ impl Lexer {
         self.input[self.position] == ch
     }
 
-    fn add_token(&mut self, token_type: TokenType, lexeme: &'static str, literal: &'static str) {
+    fn add_token(&mut self, token_type: TokenType, lexeme: &'static str, literal: &'static str, line_number: i32) {
         self.tokens.push(Token {
             token_type,
             lexeme: lexeme.to_string(),
             literal: literal.to_string(),
+            line_number,
         });
     }
 
-    fn add_token_string(&mut self, token_type: TokenType, lexeme: String, literal: String) {
+    fn add_token_string(&mut self, token_type: TokenType, lexeme: String, literal: String, line_number: i32) {
         self.tokens.push(Token {
             token_type,
             lexeme,
             literal,
+            line_number,
         });
     }
 
@@ -250,11 +253,11 @@ impl Lexer {
         return (lexeme, literal);
     }
 
-    fn add_token_identifier(&mut self, ident: String) {
+    fn add_token_identifier(&mut self, ident: String, line_number: i32) {
         if let Some(token_type) = self.keywords.get(&ident) {
-            self.add_token_string(token_type.clone(), ident, "null".to_string());
+            self.add_token_string(token_type.clone(), ident, "null".to_string(), line_number);
         } else {
-            self.add_token_string(TokenType::Identifier, ident, "null".to_string());
+            self.add_token_string(TokenType::Identifier, ident, "null".to_string(), line_number);
         }
     }
 
@@ -281,49 +284,49 @@ impl Lexer {
 
         while let Some(ch) = self.read_char() {
             match ch {
-                '(' => self.add_token(TokenType::LParen, "(", "null"),
-                ')' => self.add_token(TokenType::RParen, ")", "null"),
-                '{' => self.add_token(TokenType::LBrace, "{", "null"),
-                '}' => self.add_token(TokenType::RBrace, "}", "null"),
-                ',' => self.add_token(TokenType::Comma, ",", "null"),
-                '.' => self.add_token(TokenType::Dot, ".", "null"),
-                '-' => self.add_token(TokenType::Minus, "-", "null"),
-                '+' => self.add_token(TokenType::Plus, "+", "null"),
-                ';' => self.add_token(TokenType::Semicolon, ";", "null"),
-                '*' => self.add_token(TokenType::Asterisk, "*", "null"),
+                '(' => self.add_token(TokenType::LParen, "(", "null", line_number),
+                ')' => self.add_token(TokenType::RParen, ")", "null", line_number),
+                '{' => self.add_token(TokenType::LBrace, "{", "null", line_number),
+                '}' => self.add_token(TokenType::RBrace, "}", "null", line_number),
+                ',' => self.add_token(TokenType::Comma, ",", "null", line_number),
+                '.' => self.add_token(TokenType::Dot, ".", "null", line_number),
+                '-' => self.add_token(TokenType::Minus, "-", "null", line_number),
+                '+' => self.add_token(TokenType::Plus, "+", "null", line_number),
+                ';' => self.add_token(TokenType::Semicolon, ";", "null", line_number),
+                '*' => self.add_token(TokenType::Asterisk, "*", "null", line_number),
                 '/' => {
                     if self.expect_current_token('/') {
                         self.skip_line();
                     } else {
-                        self.add_token(TokenType::Slash, "/", "null")
+                        self.add_token(TokenType::Slash, "/", "null", line_number)
                     }
                 }
                 '=' => {
                     if self.expect_current_token('=') {
-                        self.add_token(TokenType::Equal, "==", "null");
+                        self.add_token(TokenType::Equal, "==", "null", line_number);
                     } else {
-                        self.add_token(TokenType::Assign, "=", "null");
+                        self.add_token(TokenType::Assign, "=", "null", line_number);
                     }
                 }
                 '!' => {
                     if self.expect_current_token('=') {
-                        self.add_token(TokenType::NotEqual, "!=", "null");
+                        self.add_token(TokenType::NotEqual, "!=", "null", line_number);
                     } else {
-                        self.add_token(TokenType::Bang, "!", "null");
+                        self.add_token(TokenType::Bang, "!", "null", line_number);
                     }
                 }
                 '<' => {
                     if self.expect_current_token('=') {
-                        self.add_token(TokenType::LessEqual, "<=", "null");
+                        self.add_token(TokenType::LessEqual, "<=", "null", line_number);
                     } else {
-                        self.add_token(TokenType::Less, "<", "null");
+                        self.add_token(TokenType::Less, "<", "null", line_number);
                     }
                 }
                 '>' => {
                     if self.expect_current_token('=') {
-                        self.add_token(TokenType::GreaterEqual, ">=", "null");
+                        self.add_token(TokenType::GreaterEqual, ">=", "null", line_number);
                     } else {
-                        self.add_token(TokenType::Greater, ">", "null");
+                        self.add_token(TokenType::Greater, ">", "null", line_number);
                     }
                 }
                 '\n' | '\r' => {
@@ -331,16 +334,16 @@ impl Lexer {
                     continue;
                 }
                 '"' => match self.read_string() {
-                        Some(str) =>  self.add_token_string(TokenType::String, format!("\"{}\"", str.clone()), str.clone()),
+                        Some(str) =>  self.add_token_string(TokenType::String, format!("\"{}\"", str.clone()), str.clone(), line_number),
                         None => self.errors.push(format!("[line {line_number}] Error: Unterminated string.")),
                 }
                 '0'..='9' => {
                     let (lexeme, literal) = self.read_number_str(ch);
-                    self.add_token_string(TokenType::Number, lexeme, literal);
+                    self.add_token_string(TokenType::Number, lexeme, literal, line_number);
                 }
                 _ if ch.is_identifier_char() => {
                     let ident = self.read_identifier(ch);
-                    self.add_token_identifier(ident);
+                    self.add_token_identifier(ident, line_number);
                 }
                 _ if ch.is_whitespace() => continue,
                 _ => {
@@ -350,6 +353,6 @@ impl Lexer {
             }
         }
 
-        self.add_token(TokenType::EOF, "", "null");
+        self.add_token(TokenType::EOF, "", "null", line_number);
     }
 }

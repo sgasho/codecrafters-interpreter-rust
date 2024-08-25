@@ -64,6 +64,15 @@ fn main() {
 
                 let mut p = Parser::new(l);
                 let pg = p.parse_program();
+
+                for err in p.errors.iter() {
+                   err.print_error();
+                }
+
+                if p.errors.len() > 0 {
+                    process::exit(65);
+                }
+
                 pg.print();
             } else {
                 println!("EOF  null"); // Placeholder, remove this line when implementing the scanner
