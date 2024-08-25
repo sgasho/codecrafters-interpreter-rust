@@ -104,8 +104,13 @@ impl Parser {
             Some(TokenType::Number) => self.parse_number_expression(),
             Some(TokenType::String) => self.parse_string_expression(),
             Some(TokenType::LParen) => self.parse_grouping_expression(),
-            Some(TokenType::Bang | TokenType::Minus) => self.parse_prefix_expression(),
-            _ => self.parse_nil_expression(),
+            Some(TokenType::Bang | Minus) => self.parse_prefix_expression(),
+            Some(TokenType::Nil) => self.parse_nil_expression(),
+            _ => {
+                let token = self.current_token().unwrap();
+                self.errors.push(format!("[line {}] Invalid token type {:?}", token.clone().line_number, token.clone().token_type));
+                self.parse_nil_expression()
+            }
         };
         let mut left = prefix;
 
