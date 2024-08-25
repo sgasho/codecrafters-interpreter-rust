@@ -48,7 +48,7 @@ pub enum TokenType {
 pub struct Token {
     pub token_type: TokenType,
     lexeme: String,
-    literal: String,
+    pub literal: String,
 }
 
 impl Token {

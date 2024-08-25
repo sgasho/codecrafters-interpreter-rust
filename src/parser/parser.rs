@@ -1,4 +1,4 @@
-use crate::ast::ast::{Boolean, Nil, Program, Statement};
+use crate::ast::ast::{Boolean, Expression, ExpressionStatement, Nil, Number, Program, Statement};
 use crate::lexer::lexer::{Lexer, Token, TokenType};
 use crate::lexer::lexer::TokenType::EOF;
 
@@ -51,6 +51,18 @@ impl Parser {
 
     fn parse_statement(&mut self) -> Box<dyn Statement> {
         match self.current_token_type() {
+            _ => Box::new(self.parse_expression_statement()),
+        }
+    }
+
+    fn parse_expression_statement(&mut self) -> ExpressionStatement {
+        ExpressionStatement {
+            expression: self.parse_expression(),
+        }
+    }
+
+    fn parse_expression(&mut self) -> Box<dyn Expression> {
+        match self.current_token_type() {
             Some(TokenType::True) => {
                 match self.current_token().cloned() {
                     Some(_) => Box::new(Boolean {value: true}),
@@ -60,6 +72,14 @@ impl Parser {
             Some(TokenType::False) => {
                 match self.current_token().cloned() {
                     Some(_) => Box::new(Boolean {value: false}),
+                    None => Box::new(Nil {}),
+                }
+            }
+            Some(TokenType::Number) => {
+                match self.current_token().cloned() {
+                    Some(token) => {
+                        Box::new(Number { value: token.literal.parse().unwrap()})
+                    }
                     None => Box::new(Nil {}),
                 }
             }
