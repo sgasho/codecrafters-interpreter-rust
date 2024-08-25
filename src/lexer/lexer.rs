@@ -48,7 +48,7 @@ impl TokenType {
     pub fn precedence(&self) -> i32 {
         match self {
             TokenType::LParen => 0,
-            TokenType::Equal => 1,
+            TokenType::Equal | TokenType::NotEqual => 1,
             TokenType::Less | TokenType::LessEqual | TokenType::Greater | TokenType::GreaterEqual => 2,
             TokenType::Plus | TokenType::Minus => 3,
             TokenType::Asterisk | TokenType::Slash => 4,
