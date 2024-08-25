@@ -47,8 +47,8 @@ pub enum TokenType {
 #[derive(Clone)]
 pub struct Token {
     pub token_type: TokenType,
-    lexeme: String,
-    pub literal: String,
+    pub lexeme: String,
+    literal: String,
 }
 
 impl Token {

@@ -78,7 +78,7 @@ impl Parser {
             Some(TokenType::Number) => {
                 match self.current_token().cloned() {
                     Some(token) => {
-                        Box::new(Number { value: token.literal.parse().unwrap()})
+                        Box::new(Number { value: token.lexeme.parse().unwrap()})
                     }
                     None => Box::new(Nil {}),
                 }
