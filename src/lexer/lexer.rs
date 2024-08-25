@@ -20,6 +20,7 @@ pub enum TokenType {
     Greater,
     GreaterEqual,
     String,
+    Number,
     EOF,
 }
 
@@ -57,6 +58,7 @@ impl Token {
             TokenType::Greater => "GREATER",
             TokenType::GreaterEqual => "GREATER_EQUAL",
             TokenType::String => "STRING",
+            TokenType::Number => "NUMBER",
             TokenType::EOF => "EOF",
         }
     }
@@ -129,7 +131,7 @@ impl Lexer {
     }
 
     fn read_string(&mut self) -> Option<String> {
-        let mut str = String::new();
+        let mut str= String::new();
         while self.input[self.position] != '"' {
             let ch = self.input[self.position];
             str.push(ch);
@@ -140,6 +142,36 @@ impl Lexer {
         }
         self.position += 1;
         Some(str)
+    }
+
+    // returns (lexeme, literal)
+    fn read_number_str(&mut self, first: char) -> (String, String) {
+        let mut literal = String::new();
+        let mut lexeme = String::new();
+        literal.push(first);
+        lexeme.push(first);
+        while self.is_char_ascii_digit() {
+            literal.push(self.input[self.position]);
+            lexeme.push(self.input[self.position]);
+            self.position += 1;
+        }
+        if self.position < self.input.len() && self.input[self.position] == '.' {
+            literal.push('.');
+            lexeme.push('.');
+            self.position += 1;
+            while self.is_char_ascii_digit() {
+                literal.push(self.input[self.position]);
+                lexeme.push(self.input[self.position]);
+                self.position += 1;
+            }
+        } else {
+            literal.push_str(".0");
+        }
+        return (lexeme, literal);
+    }
+
+    fn is_char_ascii_digit(&self) -> bool {
+        self.position < self.input.len() && self.input[self.position].is_ascii_digit()
     }
 
     pub fn tokenize(&mut self) {
@@ -196,11 +228,13 @@ impl Lexer {
                     line_number += 1;
                     continue;
                 }
-                '"' => {
-                    match self.read_string() {
+                '"' => match self.read_string() {
                         Some(str) =>  self.add_token_string(TokenType::String, format!("\"{}\"", str.clone()), str.clone()),
                         None => self.errors.push(format!("[line {line_number}] Error: Unterminated string.")),
-                    }
+                }
+                '0'..='9' => {
+                    let (lexeme, literal) = self.read_number_str(ch);
+                    self.add_token_string(TokenType::Number, lexeme, literal);
                 }
                 _ if ch.is_whitespace() => continue,
                 _ => {
