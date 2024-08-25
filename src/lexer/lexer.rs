@@ -1,3 +1,5 @@
+use crate::common::common::PrjChar;
+
 #[derive(Debug, PartialEq, Clone)]
 pub enum TokenType {
     LParen,
@@ -21,6 +23,7 @@ pub enum TokenType {
     GreaterEqual,
     String,
     Number,
+    Identifier,
     EOF,
 }
 
@@ -59,6 +62,7 @@ impl Token {
             TokenType::GreaterEqual => "GREATER_EQUAL",
             TokenType::String => "STRING",
             TokenType::Number => "NUMBER",
+            TokenType::Identifier => "IDENTIFIER",
             TokenType::EOF => "EOF",
         }
     }
@@ -170,8 +174,22 @@ impl Lexer {
         return (lexeme, literal);
     }
 
+    fn read_identifier(&mut self, first: char) -> String {
+        let mut ident = String::new();
+        ident.push(first);
+        while self.is_char_alphabet_or_underscore() {
+            ident.push(self.input[self.position]);
+            self.position += 1;
+        }
+        ident
+    }
+
     fn is_char_ascii_digit(&self) -> bool {
         self.position < self.input.len() && self.input[self.position].is_ascii_digit()
+    }
+
+    fn is_char_alphabet_or_underscore(&self) -> bool {
+        self.position < self.input.len() && self.input[self.position].is_alphabet_or_underscore()
     }
 
     pub fn tokenize(&mut self) {
@@ -235,6 +253,10 @@ impl Lexer {
                 '0'..='9' => {
                     let (lexeme, literal) = self.read_number_str(ch);
                     self.add_token_string(TokenType::Number, lexeme, literal);
+                }
+                _ if ch.is_alphabet_or_underscore() => {
+                    let ident = self.read_identifier(ch);
+                    self.add_token_string(TokenType::Identifier, ident, "null".to_string())
                 }
                 _ if ch.is_whitespace() => continue,
                 _ => {
