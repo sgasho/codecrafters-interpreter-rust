@@ -95,7 +95,7 @@ impl Token {
             TokenType::This => "THIS",
             TokenType::True => "TRUE",
             TokenType::Var => "VAR",
-            TokenType::While => "While",
+            TokenType::While => "WHILE",
             TokenType::EOF => "EOF",
         }
     }
