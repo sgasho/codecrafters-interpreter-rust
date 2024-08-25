@@ -1,4 +1,4 @@
-use crate::ast::ast::{Boolean, Expression, ExpressionStatement, Grouping, Nil, NumberLiteral, PrefixExpression, Program, Statement, StringLiteral};
+use crate::ast::ast::{Boolean, Expression, ExpressionStatement, Grouping, InfixExpression, Nil, NumberLiteral, PrefixExpression, Program, Statement, StringLiteral};
 use crate::lexer::lexer::{Lexer, Token, TokenType};
 use crate::lexer::lexer::TokenType::{EOF};
 
@@ -85,11 +85,11 @@ impl Parser {
 
     fn parse_expression_statement(&mut self) -> ExpressionStatement {
         ExpressionStatement {
-            expression: self.parse_expression(),
+            expression: self.parse_expression(0),
         }
     }
 
-    fn parse_expression(&mut self) -> Box<dyn Expression> {
+    fn parse_expression(&mut self, precedence: i32) -> Box<dyn Expression> {
         let prefix = match self.current_token_type() {
             Some(TokenType::True | TokenType::False) => self.parse_boolean_expression(),
             Some(TokenType::Number) => self.parse_number_expression(),
@@ -98,8 +98,21 @@ impl Parser {
             Some(TokenType::Bang | TokenType::Minus) => self.parse_prefix_expression(),
             _ => self.parse_nil_expression(),
         };
+        let mut left = prefix;
 
-        prefix
+        while precedence < self.peek_precedence() {
+            match self.peek_token_type() {
+                Some(TokenType::Asterisk | TokenType::Slash | TokenType::Plus | TokenType::Minus) => {
+                    self.next_token();
+                    left = self.parse_infix_expression(left);
+                }
+                _ => {
+                    return left;
+                }
+            }
+        }
+
+        left
     }
 
     fn parse_boolean_expression(&mut self) -> Box<dyn Expression> {
@@ -135,7 +148,7 @@ impl Parser {
 
     fn parse_grouping_expression(&mut self) -> Box<dyn Expression> {
         self.next_token();
-        let exp = self.parse_expression();
+        let exp = self.parse_expression(0);
 
         if !self.peek_token_type_is(TokenType::RParen) {
             return self.parse_nil_expression();
@@ -151,13 +164,29 @@ impl Parser {
         match self.current_token().cloned() {
             Some(token) => {
                 self.next_token();
-                let right = self.parse_expression();
+                let right = self.parse_expression(6);
                 Box::new( PrefixExpression {
                     operator: token.clone(),
                     right,
                 } )
             }
             None => self.parse_nil_expression()
+        }
+    }
+
+    fn parse_infix_expression(&mut self, left: Box<dyn Expression>) -> Box<dyn Expression> {
+        match self.current_token().cloned() {
+            Some(token) => {
+                let precedence = token.token_type.precedence();
+                self.next_token();
+                let right = self.parse_expression(precedence);
+                Box::new(InfixExpression {
+                    token,
+                    left,
+                    right,
+                })
+            },
+            None => self.parse_nil_expression(),
         }
     }
 }

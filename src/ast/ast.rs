@@ -1,4 +1,4 @@
-use crate::lexer::lexer::{Token, TokenType};
+use crate::lexer::lexer::{Token};
 
 pub trait Node {
     fn string(&self) -> String;
@@ -104,3 +104,17 @@ impl Node for PrefixExpression {
 }
 
 impl Expression for PrefixExpression {}
+
+pub struct InfixExpression {
+    pub token: Token,
+    pub left: Box<dyn Expression>,
+    pub right: Box<dyn Expression>,
+}
+
+impl Node for InfixExpression {
+    fn string(&self) -> String {
+        format!("({} {} {})", self.token.lexeme, self.left.string(), self.right.string())
+    }
+}
+
+impl Expression for InfixExpression {}
