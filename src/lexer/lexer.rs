@@ -87,7 +87,7 @@ impl Token {
             TokenType::For => "FOR",
             TokenType::Fun => "FUN",
             TokenType::If => "IF",
-            TokenType::Nil => "Nil",
+            TokenType::Nil => "NIL",
             TokenType::Or => "OR",
             TokenType::Print => "PRINT",
             TokenType::Return => "RETURN",
