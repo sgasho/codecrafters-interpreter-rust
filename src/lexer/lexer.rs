@@ -168,6 +168,12 @@ impl Lexer {
                 lexeme.push(self.input[self.position]);
                 self.position += 1;
             }
+            while literal.ends_with("0") {
+                literal = literal.trim_end_matches('0').to_string();
+            }
+            if literal.ends_with(".") {
+                literal.push_str("0");
+            }
         } else {
             literal.push_str(".0");
         }
