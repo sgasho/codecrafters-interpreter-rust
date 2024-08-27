@@ -1,7 +1,23 @@
+use std::any::Any;
 use crate::lexer::lexer::{Token};
 
-pub trait Node {
+#[derive(Debug)]
+pub enum NodeType {
+    Program,
+    ExpressionStatement,
+    Boolean,
+    NumberLiteral,
+    StringLiteral,
+    Grouping,
+    PrefixExpression,
+    InfixExpression,
+    Nil,
+}
+
+pub trait Node: Any {
     fn string(&self) -> String;
+    fn node_type(&self) -> NodeType;
+    fn as_any(&self) -> &dyn Any;
 }
 
 pub trait Statement: Node {}
@@ -15,6 +31,13 @@ pub struct ExpressionStatement {
 impl Node for ExpressionStatement {
     fn string(&self) -> String {
         self.expression.string()
+    }
+    fn node_type(&self) -> NodeType {
+        NodeType::ExpressionStatement
+    }
+
+    fn as_any(&self) -> &dyn Any {
+        self
     }
 }
 
@@ -33,6 +56,20 @@ impl Program {
     }
 }
 
+impl Node for Program {
+    fn string(&self) -> String {
+        "program".to_string()
+    }
+
+    fn node_type(&self) -> NodeType {
+        NodeType::Program
+    }
+
+    fn as_any(&self) -> &dyn Any {
+        self
+    }
+}
+
 pub struct Boolean {
     pub value: bool,
 }
@@ -40,6 +77,13 @@ pub struct Boolean {
 impl Node for Boolean {
     fn string(&self) -> String {
         self.value.to_string()
+    }
+    fn node_type(&self) -> NodeType {
+        NodeType::Boolean
+    }
+
+    fn as_any(&self) -> &dyn Any {
+        self
     }
 }
 
@@ -50,6 +94,13 @@ pub struct Nil {}
 impl Node for Nil {
     fn string(&self) -> String {
         "nil".to_string()
+    }
+    fn node_type(&self) -> NodeType {
+        NodeType::Nil
+    }
+
+    fn as_any(&self) -> &dyn Any {
+        self
     }
 }
 
@@ -64,6 +115,13 @@ impl Node for NumberLiteral {
     fn string(&self) -> String {
         self.literal.to_string()
     }
+    fn node_type(&self) -> NodeType {
+        NodeType::NumberLiteral
+    }
+
+    fn as_any(&self) -> &dyn Any {
+        self
+    }
 }
 
 impl Expression for NumberLiteral {}
@@ -76,6 +134,13 @@ impl Node for StringLiteral {
     fn string(&self) -> String {
         self.value.to_string()
     }
+    fn node_type(&self) -> NodeType {
+        NodeType::StringLiteral
+    }
+
+    fn as_any(&self) -> &dyn Any {
+        self
+    }
 }
 
 impl Expression for StringLiteral {}
@@ -87,6 +152,13 @@ pub struct Grouping {
 impl Node for Grouping {
     fn string(&self) -> String {
         format!("(group {})", self.expression.string())
+    }
+    fn node_type(&self) -> NodeType {
+        NodeType::Grouping
+    }
+
+    fn as_any(&self) -> &dyn Any {
+        self
     }
 }
 
@@ -101,6 +173,13 @@ impl Node for PrefixExpression {
     fn string(&self) -> String {
         format!("({} {})", self.operator.lexeme, self.right.string())
     }
+    fn node_type(&self) -> NodeType {
+        NodeType::PrefixExpression
+    }
+
+    fn as_any(&self) -> &dyn Any {
+        self
+    }
 }
 
 impl Expression for PrefixExpression {}
@@ -114,6 +193,13 @@ pub struct InfixExpression {
 impl Node for InfixExpression {
     fn string(&self) -> String {
         format!("({} {} {})", self.token.lexeme, self.left.string(), self.right.string())
+    }
+    fn node_type(&self) -> NodeType {
+        NodeType::InfixExpression
+    }
+
+    fn as_any(&self) -> &dyn Any {
+        self
     }
 }
 
