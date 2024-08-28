@@ -1,5 +1,7 @@
 pub enum ObjectType {
     BooleanObj,
+    StringLiteralObj,
+    NumberLiteralObj,
     NilObj,
 }
 
@@ -18,6 +20,33 @@ impl Object for Boolean {
     }
     fn inspect(&self) -> String {
         self.value.to_string()
+    }
+}
+
+pub struct StringLiteral {
+    pub value: String,
+}
+
+impl Object for StringLiteral {
+    fn obj_type(&self) -> ObjectType {
+        ObjectType::StringLiteralObj
+    }
+    fn inspect(&self) -> String {
+        self.value.to_string()
+    }
+}
+
+pub struct NumberLiteral {
+    pub value: f64,
+    pub literal: String,
+}
+
+impl Object for NumberLiteral {
+    fn obj_type(&self) -> ObjectType {
+        ObjectType::NumberLiteralObj
+    }
+    fn inspect(&self) -> String {
+        self.literal.to_string()
     }
 }
 
